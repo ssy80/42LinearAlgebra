@@ -5,11 +5,15 @@ from typing import TypeVar
 K = TypeVar("K", int, float)
 
 
-#fn angle_cos::<K>(u: &Vector::<K>, v: &Vector::<K>) -> f32;
 def angle_cos(u: Vector[K], v: Vector[K]) -> float:
     """
     Compute cos(u, v), the cosine of the angle between the two vectors u and v
+    cos(θ) = A.B / (||A||||B||)
+    ||A|| = length of A = 2-norm - also known as magnitude
     """
+
+    return u.dot(v) / (u.norm() * v.norm())
+
 
 def main():
     """main"""
@@ -41,3 +45,14 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+'''
+# Rounding issue
+eps = 1e-12
+if abs(result - 1.0) < eps:
+    result = 1.0
+elif abs(result + 1.0) < eps:
+    result = -1.0
+elif abs(result) < eps:
+    result = 0.0
+'''
