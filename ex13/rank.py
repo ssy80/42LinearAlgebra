@@ -1,0 +1,27 @@
+from matrix import Matrix
+from typing import TypeVar
+
+
+K = TypeVar("K", int, float)
+
+
+def main():
+    """main"""
+
+    try:
+
+        u = Matrix([[1., 0., 0.],[0., 1., 0.],[0., 0., 1.],])
+        print(u.rank()) # 3
+
+        u = Matrix([[ 1., 2., 0., 0.],[ 2., 4., 0., 0.],[-1., 2., 1., 1.],])
+        print(u.rank()) # 2
+
+        u = Matrix([[8., 5., -2.],[ 4., 7., 20.],[ 7., 6., 1.],[21., 18., 7.],])
+        print(u.rank()) # 3
+        
+    except Exception as e:
+        print(f"Error: {str(e)}")
+
+
+if __name__ == "__main__":
+    main()
