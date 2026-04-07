@@ -51,15 +51,17 @@ class Matrix(Generic[K]):
 
     def mul_vec(self, vec: Vector[K]) -> Vector[K]:
         """
+        Matrix * Vector
+        Matrix cols must match with vector rows.
+        [[1,2,3], [4,5,6]] * [[2],[2],[2]] = 
+        [[1*2 + 2*2 + 3*2]
+         [4*2 + 5*2 + 6*2]] =
+        [[12],
+         [30]] 
         """
-        rows = len(self.value)
+        self.is_match_matrix_col_vector_row(vec)
+        
         cols = len(self.value[0])
-        
-        v_rows = len(vec.value)
-
-        if cols != v_rows:
-            raise ValueError("Matrix columns must equal vector rows")
-        
         result = []
 
         for row in self.value:
@@ -71,8 +73,10 @@ class Matrix(Generic[K]):
     def mul_mat(self, mat: "Matrix[K]")-> "Matrix[K]":
         """
         Matrix * Matrix multiplication
-            Am*n X Bn*p , A(m=rows,n=cols), B(n=rows, p=cols) must be An == Bn
-        Compute (row of A ⋅ column of B) if columns of A == rows of B
+            take a row from the first matrix
+            take a column from the second matrix
+            do a dot product
+            put that result in the output matrix
         """
         am, an = self.shape()
         bn, bp = mat.shape()
@@ -291,6 +295,16 @@ class Matrix(Generic[K]):
             raise ValueError("matrix row count does not match")
         if len(self.value[0]) != len(v.value[0]):
             raise ValueError("matrix column count does not match")
+
+    def is_match_matrix_col_vector_row(self, vec: Vector[K])-> None:
+        """
+        """
+        cols = len(self.value[0])
+        
+        v_rows = len(vec.value)
+
+        if cols != v_rows:
+            raise ValueError("Matrix columns must equal vector rows")
 
     def __repr__(self) -> str:
         return "\n".join(str(row) for row in self.value)

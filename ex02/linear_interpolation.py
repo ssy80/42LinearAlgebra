@@ -23,7 +23,7 @@ def lerp(u: V, v: V, t: float) -> V:
         v_minus_u = Vector([row[0] for row in v.value]).sub(Vector([row[0] for row in u.value]))
         v_minus_u_t = v_minus_u.scl(t)
         result = Vector([row[0] for row in u.value]).add(v_minus_u_t)
-        return result
+        return result   
 
     if isinstance(u, Matrix):
         is_match_matrix_shape(u, v)
@@ -75,6 +75,7 @@ def main():
     """main"""
 
     try:
+        
         print(lerp(0.0, 1.0, 0.0))  #0.0
         print(lerp(0.0, 1.0, 1.0))  #1.0
         print(lerp(0.0, 1.0, 0.5))  #0.5
@@ -82,8 +83,12 @@ def main():
         print(lerp(Vector([2.0, 1.0]), Vector([4.0, 2.0]), 0.3)) #[2.6][1.3]
         print(lerp(Matrix([[2.0, 1.0], [3.0, 4.0]]), Matrix([[20.0, 10.0], [30.0, 40.0]]), 0.5)) #[[11., 5.5][16.5, 22.]]
 
+        print(lerp(0, 1, 0.5))  #0.5
+        
+
     except Exception as e:
         print(f"Error: {str(e)}")
+
 
 if __name__ == "__main__":
     main()

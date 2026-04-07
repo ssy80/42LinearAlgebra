@@ -1,9 +1,5 @@
 from vector import Vector
 from matrix import Matrix
-from typing import TypeVar
-
-
-K = TypeVar("K", int, float)
 
 
 def main():

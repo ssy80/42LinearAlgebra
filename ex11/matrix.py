@@ -6,6 +6,7 @@ K = TypeVar("K", int, float)
 
 
 class Matrix(Generic[K]):
+    EPS = 1e-12
 
     def __init__(self, v: list[list[K]]) -> None:
         """
@@ -50,15 +51,17 @@ class Matrix(Generic[K]):
 
     def mul_vec(self, vec: Vector[K]) -> Vector[K]:
         """
+        Matrix * Vector
+        Matrix cols must match with vector rows.
+        [[1,2,3], [4,5,6]] * [[2],[2],[2]] = 
+        [[1*2 + 2*2 + 3*2]
+         [4*2 + 5*2 + 6*2]] =
+        [[12],
+         [30]] 
         """
-        rows = len(self.value)
+        self.is_match_matrix_col_vector_row(vec)
+        
         cols = len(self.value[0])
-        
-        v_rows = len(vec.value)
-
-        if cols != v_rows:
-            raise ValueError("Matrix columns must equal vector rows")
-        
         result = []
 
         for row in self.value:
@@ -70,8 +73,10 @@ class Matrix(Generic[K]):
     def mul_mat(self, mat: "Matrix[K]")-> "Matrix[K]":
         """
         Matrix * Matrix multiplication
-            Am*n X Bn*p , A(m=rows,n=cols), B(n=rows, p=cols) must be An == Bn
-        Compute (row of A ⋅ column of B) if columns of A == rows of B
+            take a row from the first matrix
+            take a column from the second matrix
+            do a dot product
+            put that result in the output matrix
         """
         am, an = self.shape()
         bn, bp = mat.shape()
@@ -88,6 +93,7 @@ class Matrix(Generic[K]):
         Only defined for square matrices
         """
         self.is_square_matrix()
+        rows, _ = self.shape()
         mat = self.value
         return sum(mat[i][i] for i in range(rows))
 
@@ -104,39 +110,8 @@ class Matrix(Generic[K]):
         Reduced Row echelon form
         RREF (Gauss-Jordan)
         """
-        rows, cols = self.shape()
-
         mat = [[float(x) for x in row] for row in self.value]
-        pivot_row = 0
-
-        for col in range(cols):
-            if pivot_row >= rows:
-                break
-
-            # Partial pivoting: pick the row with the col having largest absolute value.
-            best_row = max(range(pivot_row, rows), key=lambda r: abs(mat[r][col])) # pass r from range(), max() find largest col value using key, get row with largest col value 
-
-            if mat[best_row][col] == 0:  # col is 0, go next col
-                continue
-
-            if best_row != pivot_row:    # swap pivot row with best row, best_row becomes pivot_row
-                mat[pivot_row], mat[best_row] = mat[best_row], mat[pivot_row]
-
-            pivot = mat[pivot_row][col]
-            
-            mat[pivot_row] = [x / pivot for x in mat[pivot_row]] # Normalize pivot row so each pivot is 1.0. By dividing every number with pivot
-
-            # Gauss-Jordan elimination (RREF): clear above and below pivot.
-            for r in range(rows):
-                if r == pivot_row:
-                    continue
-                factor = mat[r][col]
-                if factor == 0:
-                    continue
-                mat[r] = [a - factor * b for a, b in zip(mat[r], mat[pivot_row])]
-
-            pivot_row += 1
-
+        mat, _ = self._gauss_jordan_elimination(mat)
         return Matrix(mat)
 
     def determinant(self)-> K:
@@ -145,7 +120,10 @@ class Matrix(Generic[K]):
         Reduces the matrix to an upper triangular matrix, and then computes the determinant from the product of the diagonal pivots.
         Row Reduction using Gaussian elimination.
 
-        Computes the determinant by reducing the matrix to upper triangular form and multiplying the pivots, while accounting for row swaps.
+        det(A) = 0
+            no inverse
+            squashed space
+            row/cols are dependent
         """
         self.is_square_matrix()
         rows, cols = self.shape()
@@ -154,21 +132,20 @@ class Matrix(Generic[K]):
         if rows == 1:
             return self.value[0][0]
 
-        side_length = cols # rows or cols does not matter as it is a square matrix
+        side_length = cols
 
         mat = [[float(x) for x in row] for row in self.value]
         det = 1
-        EPS = 1e-12
 
         for i in range(side_length): 
             pivot = max(range(i, side_length), key=lambda r: abs(mat[r][i]))  # Find the row with the largest absolute value in the pivot column
             
-            if abs(mat[pivot][i]) < EPS:      # if any pivot is 0, the diagonal number will have 0, a * 0 = 0.
+            if abs(mat[pivot][i]) < self.EPS:                                 # if any pivot is 0, the diagonal number will have 0, a * 0 = 0.
                 return 0
-            if pivot != i:                    # pivot row id is not same as currnt row, swap row, best row now on top mat[i].
-                mat[i], mat[pivot], det = mat[pivot], mat[i], -det     # every row swap, det sign is changed by multiply by -1
+            if pivot != i:                                                    # pivot row id is not same as currnt row, swap row, best row now on top mat[i].
+                mat[i], mat[pivot], det = mat[pivot], mat[i], -det            # every row swap, det sign is changed by multiply by -1
             
-            det *= mat[i][i]                 # no need normalise to 1
+            det *= mat[i][i]
             
             for r in range(i+1, side_length):               # process each col value to 0 below pivot value
                 factor = mat[r][i] / mat[i][i]              # elimination factor
@@ -180,41 +157,90 @@ class Matrix(Generic[K]):
     def inverse(self) -> "Matrix[K]":
         """
         Inverse of a square matrix using Gauss-Jordan elimination.
+        Gauss-Jordan elimination, which is general for all square sizes.
+        [A|I]->[I|A-1]
         """
         self.is_square_matrix()
         rows, _ = self.shape()
         det = float(self.determinant())
-        eps = 1e-12
-        if abs(det) < eps:
+        if abs(det) < self.EPS:
             raise ValueError("matrix is singular and has no inverse")
 
         a = [[float(x) for x in row] for row in self.value]
         inv = [[1.0 if r == c else 0.0 for c in range(rows)] for r in range(rows)]
-
-        for col in range(rows):
-            pivot = max(range(col, rows), key=lambda r: abs(a[r][col]))
-            if abs(a[pivot][col]) < eps:
-                raise ValueError("matrix is singular and has no inverse")
-
-            if pivot != col:
-                a[col], a[pivot] = a[pivot], a[col]
-                inv[col], inv[pivot] = inv[pivot], inv[col]
-
-            pivot_val = a[col][col]
-            a[col] = [x / pivot_val for x in a[col]]
-            inv[col] = [x / pivot_val for x in inv[col]]
-
-            for r in range(rows):
-                if r == col:
-                    continue
-                factor = a[r][col]
-                if abs(factor) < eps:
-                    continue
-                a[r] = [x - factor * y for x, y in zip(a[r], a[col])]
-                inv[r] = [x - factor * y for x, y in zip(inv[r], inv[col])]
-
+        _, inv = self._gauss_jordan_elimination(a, inv, require_full_pivot=True)
         return Matrix(inv)
 
+    def rank(self) -> int:
+        """
+        Rank of matrix = number of non-zero rows in RREF.
+        """
+        mat = [[float(x) for x in row] for row in self.value]
+        mat, _ = self._gauss_jordan_elimination(mat)
+        # Count rows that are not all zero
+        rank = 0
+        for row in mat:
+            if any(abs(x) >= self.EPS for x in row):
+                rank += 1
+        return rank
+
+    def _gauss_jordan_elimination(
+        self,
+        left: list[list[float]],
+        right: list[list[float]] | None = None,
+        require_full_pivot: bool = False,
+    ) -> tuple[list[list[float]], list[list[float]] | None]:
+        """
+        Gauss-Jordan elimination on left matrix (and optional right matrix).
+        left is use for RREF
+        right is use for Inverse (Identity matrix)
+        require_full_pivot - inverse check, no row can be without a pivot
+        """
+        rows = len(left)
+        cols = len(left[0])
+        pivot_row = 0
+
+        for col in range(cols):
+            if pivot_row >= rows:
+                break
+            
+            # Partial pivoting: pick the row with the col having largest absolute value.
+            best_row = max(range(pivot_row, rows), key=lambda r: abs(left[r][col])) # pass r from range(), max() find largest col value using key, get row with largest col value 
+            
+            if abs(left[best_row][col]) < self.EPS:     # best row (pivot) col is 0, 
+                if require_full_pivot:                  # cannot get inverse
+                    raise ValueError("matrix is singular and has no inverse")
+                continue
+
+            if best_row != pivot_row:                     # swap pivot row with best row, best_row becomes pivot_row
+                left[pivot_row], left[best_row] = left[best_row], left[pivot_row]
+                if right is not None:
+                    right[pivot_row], right[best_row] = right[best_row], right[pivot_row]
+
+            pivot = left[pivot_row][col]
+
+            left[pivot_row] = [x / pivot for x in left[pivot_row]]     # Normalize pivot row so each pivot is 1.0. By dividing every number with pivot
+            if right is not None:
+                right[pivot_row] = [x / pivot for x in right[pivot_row]]
+
+            # Gauss-Jordan elimination: clear above and below pivot.
+            for r in range(rows):
+                if r == pivot_row:
+                    continue
+                factor = left[r][col]
+                if abs(factor) < self.EPS:
+                    continue
+                left[r] = [a - factor * b for a, b in zip(left[r], left[pivot_row])]
+                if right is not None:
+                    right[r] = [a - factor * b for a, b in zip(right[r], right[pivot_row])]
+
+            pivot_row += 1
+
+        if require_full_pivot and pivot_row < rows:  # final pivot check, every row must have a pivot.
+            raise ValueError("matrix is singular and has no inverse")
+
+        return left, right
+    
     def is_square_matrix(self)-> None:
         """
         Check shape for square matrix
@@ -272,6 +298,16 @@ class Matrix(Generic[K]):
             raise ValueError("matrix row count does not match")
         if len(self.value[0]) != len(v.value[0]):
             raise ValueError("matrix column count does not match")
+
+    def is_match_matrix_col_vector_row(self, vec: Vector[K])-> None:
+        """
+        """
+        cols = len(self.value[0])
+        
+        v_rows = len(vec.value)
+
+        if cols != v_rows:
+            raise ValueError("Matrix columns must equal vector rows")
 
     def __repr__(self) -> str:
         return "\n".join(str(row) for row in self.value)

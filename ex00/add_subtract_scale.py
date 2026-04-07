@@ -18,6 +18,11 @@ def main():
 
         u = Vector([2., 3.])
         print(u.scl(2.))        #[4.0][6.0]
+        print(u.scl(0))         #[0][0]
+
+        #u = Vector([])         #error
+        #u = Vector(["a"])      #error
+        #u = Vector([[True]])   #error
 
         # matrix
         u = Matrix([[1., 2.], [3., 4.]])
@@ -30,6 +35,12 @@ def main():
 
         u = Matrix([[1., 2.], [3., 4.]])
         print(u.scl(2.))       # [2.0, 4.0] [6.0, 8.0]
+
+        #u = Matrix([[], [3., 4.]]) #error
+        #u = Matrix([])             #error
+        #u = Matrix([["a"]])        #error
+        #u = Matrix([1])            #error
+        
 
     except Exception as e:
         print(f"Error: {str(e)}")

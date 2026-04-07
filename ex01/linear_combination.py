@@ -1,7 +1,6 @@
 from __future__ import annotations
 from vector import Vector
 from typing import TypeVar
-#from math import fma
 
 
 K = TypeVar("K", int, float)
@@ -15,8 +14,8 @@ def linear_combination(u: list[Vector[K]], coefs: list[K]) -> Vector[K]:
     is_valid_list_of_coefs(coefs)
     is_length_match(u, coefs)
 
-    dim = len(u[0].value)
-    result_vec = Vector([0.0] * dim)  #init a blank vector of [[0], [0], [0]]
+    size = len(u[0].value)
+    result_vec = Vector([0.0] * size)  #init a blank vector of [[0], [0], [0]]
     
     for vec, coef in zip(u, coefs):
         uc_vec = Vector([row[0] for row in vec.value]).scl(coef)
@@ -73,12 +72,20 @@ def main():
         v2 = Vector([0., 10., -100.])
         print(linear_combination([v1, v2], [10., -2.])) #[10.][0.][230.]
 
+        #print(linear_combination([v1, v2], [10., -2., 1])) #error
+        #print(linear_combination([v1, v2], []))            #error
+
     except Exception as e:
         print(f"Error: {str(e)}")
 
 
 if __name__ == "__main__":
     main()
+
+
+
+
+
 
 
 '''
@@ -96,6 +103,6 @@ def linear_combination(u: list[Vector[K]], coefs: list[K]) -> Vector[K]:
     for vec, coef in zip(u, coefs):
         for i, row in enumerate(vec.value):   # row is like [x_i]
             acc[i] = fma(float(coef), float(row[0]), acc[i])
-    
+
     return Vector(acc)
 '''    

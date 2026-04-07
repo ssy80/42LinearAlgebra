@@ -27,6 +27,7 @@ def cross_product(u: Vector[K], v: Vector[K]) -> Vector[K]:
             ])
     return result
 
+
 def main():
     """main"""
 

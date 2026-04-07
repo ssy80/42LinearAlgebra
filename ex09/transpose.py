@@ -10,7 +10,7 @@ def main():
 
     try:
 
-        u = Matrix([[2., 0.],[0., 3.],[1, 5],])
+        u = Matrix([[2., 0.],[0., 3.],[1, 5],])   # [2, 0, 1], [0, 3, 5]
         print(u.transpose())
 
     except Exception as e:

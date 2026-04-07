@@ -59,7 +59,8 @@ class Vector(Generic[K]):
 
     def norm(self) -> float:
         """
-        2 norm - square root of the sum of the squares of its components
+        2-norm - square root of the sum of the squares of its components
+        length of vector
         """
         total = sum(pow(x[0], 2) for x in self.value)
         return self.sqrt(total)

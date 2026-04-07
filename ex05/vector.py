@@ -59,7 +59,8 @@ class Vector(Generic[K]):
 
     def norm(self) -> float:
         """
-        2 norm - square root of the sum of the squares of its components
+        2-norm - square root of the sum of the squares of its components
+        length of vector
         """
         total = sum(pow(x[0], 2) for x in self.value)
         return self.sqrt(total)
@@ -69,6 +70,14 @@ class Vector(Generic[K]):
         infinity norm - largest absolute value among its components.
         """
         return max([abs(x[0]) for x in self.value])
+
+    def shape(self)-> tuple:
+        """
+        Return the shape of the vector
+        """
+        rows = len(self.value)
+        cols = len(self.value[0])
+        return (rows, cols)
 
     def sqrt(self, x):
         """

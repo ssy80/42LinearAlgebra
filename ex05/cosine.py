@@ -11,8 +11,13 @@ def angle_cos(u: Vector[K], v: Vector[K]) -> float:
     cos(θ) = A.B / (||A||||B||)
     ||A|| = length of A = 2-norm - also known as magnitude
     """
+    norm_u = u.norm()
+    norm_v = v.norm()
 
-    return u.dot(v) / (u.norm() * v.norm())
+    if norm_u == 0 or norm_v == 0:
+        raise ValueError("angle is undefined for zero vectors")
+
+    return u.dot(v) / (norm_u * norm_v)
 
 
 def main():
@@ -45,6 +50,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 
 '''
 # Rounding issue

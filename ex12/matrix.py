@@ -51,15 +51,17 @@ class Matrix(Generic[K]):
 
     def mul_vec(self, vec: Vector[K]) -> Vector[K]:
         """
+        Matrix * Vector
+        Matrix cols must match with vector rows.
+        [[1,2,3], [4,5,6]] * [[2],[2],[2]] = 
+        [[1*2 + 2*2 + 3*2]
+         [4*2 + 5*2 + 6*2]] =
+        [[12],
+         [30]] 
         """
-        rows = len(self.value)
+        self.is_match_matrix_col_vector_row(vec)
+        
         cols = len(self.value[0])
-        
-        v_rows = len(vec.value)
-
-        if cols != v_rows:
-            raise ValueError("Matrix columns must equal vector rows")
-        
         result = []
 
         for row in self.value:
@@ -71,8 +73,10 @@ class Matrix(Generic[K]):
     def mul_mat(self, mat: "Matrix[K]")-> "Matrix[K]":
         """
         Matrix * Matrix multiplication
-            Am*n X Bn*p , A(m=rows,n=cols), B(n=rows, p=cols) must be An == Bn
-        Compute (row of A ⋅ column of B) if columns of A == rows of B
+            take a row from the first matrix
+            take a column from the second matrix
+            do a dot product
+            put that result in the output matrix
         """
         am, an = self.shape()
         bn, bp = mat.shape()
@@ -109,63 +113,6 @@ class Matrix(Generic[K]):
         mat = [[float(x) for x in row] for row in self.value]
         mat, _ = self._gauss_jordan_elimination(mat)
         return Matrix(mat)
-
-    def _gauss_jordan_elimination(
-        self,
-        left: list[list[float]],
-        right: list[list[float]] | None = None,
-        require_full_pivot: bool = False,
-    ) -> tuple[list[list[float]], list[list[float]] | None]:
-        """
-        Gauss-Jordan elimination on left matrix (and optional right matrix).
-        left is use for RREF
-        right is use for Inverse (Identity matrix)
-        require_full_pivot - inverse check, no row can be without a pivot
-        """
-        rows = len(left)
-        cols = len(left[0])
-        pivot_row = 0
-
-        for col in range(cols):
-            if pivot_row >= rows:
-                break
-            
-            # Partial pivoting: pick the row with the col having largest absolute value.
-            best_row = max(range(pivot_row, rows), key=lambda r: abs(left[r][col])) # pass r from range(), max() find largest col value using key, get row with largest col value 
-            
-            if abs(left[best_row][col]) < self.EPS:     # best row (pivot) col is 0, 
-                if require_full_pivot:                  # cannot get inverse
-                    raise ValueError("matrix is singular and has no inverse")
-                continue
-
-            if best_row != pivot_row:                     # swap pivot row with best row, best_row becomes pivot_row
-                left[pivot_row], left[best_row] = left[best_row], left[pivot_row]
-                if right is not None:
-                    right[pivot_row], right[best_row] = right[best_row], right[pivot_row]
-
-            pivot = left[pivot_row][col]
-
-            left[pivot_row] = [x / pivot for x in left[pivot_row]]     # Normalize pivot row so each pivot is 1.0. By dividing every number with pivot
-            if right is not None:
-                right[pivot_row] = [x / pivot for x in right[pivot_row]]
-
-            # Gauss-Jordan elimination: clear above and below pivot.
-            for r in range(rows):
-                if r == pivot_row:
-                    continue
-                factor = left[r][col]
-                if abs(factor) < self.EPS:
-                    continue
-                left[r] = [a - factor * b for a, b in zip(left[r], left[pivot_row])]
-                if right is not None:
-                    right[r] = [a - factor * b for a, b in zip(right[r], right[pivot_row])]
-
-            pivot_row += 1
-
-        if require_full_pivot and pivot_row < rows:  # final pivot check, every row must have a pivot.
-            raise ValueError("matrix is singular and has no inverse")
-
-        return left, right
 
     def determinant(self)-> K:
         """
@@ -227,8 +174,70 @@ class Matrix(Generic[K]):
         """
         mat = [[float(x) for x in row] for row in self.value]
         mat, _ = self._gauss_jordan_elimination(mat)
-        return sum(1 for row in mat if any(abs(x) >= self.EPS for x in row))
+        # Count rows that are not all zero
+        rank = 0
+        for row in mat:
+            if any(abs(x) >= self.EPS for x in row):
+                rank += 1
+        return rank
 
+    def _gauss_jordan_elimination(
+        self,
+        left: list[list[float]],
+        right: list[list[float]] | None = None,
+        require_full_pivot: bool = False,
+    ) -> tuple[list[list[float]], list[list[float]] | None]:
+        """
+        Gauss-Jordan elimination on left matrix (and optional right matrix).
+        left is use for RREF
+        right is use for Inverse (Identity matrix)
+        require_full_pivot - inverse check, no row can be without a pivot
+        """
+        rows = len(left)
+        cols = len(left[0])
+        pivot_row = 0
+
+        for col in range(cols):
+            if pivot_row >= rows:
+                break
+            
+            # Partial pivoting: pick the row with the col having largest absolute value.
+            best_row = max(range(pivot_row, rows), key=lambda r: abs(left[r][col])) # pass r from range(), max() find largest col value using key, get row with largest col value 
+            
+            if abs(left[best_row][col]) < self.EPS:     # best row (pivot) col is 0, 
+                if require_full_pivot:                  # cannot get inverse
+                    raise ValueError("matrix is singular and has no inverse")
+                continue
+
+            if best_row != pivot_row:                     # swap pivot row with best row, best_row becomes pivot_row
+                left[pivot_row], left[best_row] = left[best_row], left[pivot_row]
+                if right is not None:
+                    right[pivot_row], right[best_row] = right[best_row], right[pivot_row]
+
+            pivot = left[pivot_row][col]
+
+            left[pivot_row] = [x / pivot for x in left[pivot_row]]     # Normalize pivot row so each pivot is 1.0. By dividing every number with pivot
+            if right is not None:
+                right[pivot_row] = [x / pivot for x in right[pivot_row]]
+
+            # Gauss-Jordan elimination: clear above and below pivot.
+            for r in range(rows):
+                if r == pivot_row:
+                    continue
+                factor = left[r][col]
+                if abs(factor) < self.EPS:
+                    continue
+                left[r] = [a - factor * b for a, b in zip(left[r], left[pivot_row])]
+                if right is not None:
+                    right[r] = [a - factor * b for a, b in zip(right[r], right[pivot_row])]
+
+            pivot_row += 1
+
+        if require_full_pivot and pivot_row < rows:  # final pivot check, every row must have a pivot.
+            raise ValueError("matrix is singular and has no inverse")
+
+        return left, right
+    
     def is_square_matrix(self)-> None:
         """
         Check shape for square matrix
@@ -286,6 +295,16 @@ class Matrix(Generic[K]):
             raise ValueError("matrix row count does not match")
         if len(self.value[0]) != len(v.value[0]):
             raise ValueError("matrix column count does not match")
+
+    def is_match_matrix_col_vector_row(self, vec: Vector[K])-> None:
+        """
+        """
+        cols = len(self.value[0])
+        
+        v_rows = len(vec.value)
+
+        if cols != v_rows:
+            raise ValueError("Matrix columns must equal vector rows")
 
     def __repr__(self) -> str:
         return "\n".join(str(row) for row in self.value)

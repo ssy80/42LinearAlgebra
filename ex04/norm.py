@@ -2,7 +2,10 @@ from vector import Vector
 
 
 def main():
-    """main"""
+    """
+    main
+    A vector norm is a way to measure the length or size of a vector.
+    """
 
     try:
         u = Vector([0., 0., 0.])
