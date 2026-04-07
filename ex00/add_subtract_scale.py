@@ -2,6 +2,7 @@ from vector import Vector
 from matrix import Matrix
 
 
+'''define n as the total number of elements in the matrix to get O(n)'''
 def main():
     """main"""
 

@@ -1,11 +1,6 @@
 from matrix import Matrix
-from typing import TypeVar
 
 
-K = TypeVar("K", int, float)
-
-
-# Computes the row-echelon form of the given matrix
 def main():
     """main"""
 
@@ -16,19 +11,19 @@ def main():
             [0., 1., 0.],
             [0., 0., 1.],
         ])
-        #print(u.row_echelon()) # [1.0, 0.0, 0.0] [0.0, 1.0, 0.0] [0.0, 0.0, 1.0]
+        print(u.row_echelon()) # [1.0, 0.0, 0.0] [0.0, 1.0, 0.0] [0.0, 0.0, 1.0]
 
         u = Matrix([
             [1., 2.],
             [3., 4.],
         ])
-        #print(u.row_echelon()) # [1.0, 0.0] [0.0, 1.0]
+        print(u.row_echelon()) # [1.0, 0.0] [0.0, 1.0]
 
         u = Matrix([
             [1., 2.],
             [2., 4.],
         ])
-        #print(u.row_echelon()) # [1.0, 2.0] [0.0, 0.0]
+        print(u.row_echelon()) # [1.0, 2.0] [0.0, 0.0]
         
         u = Matrix([
             [8., 5., -2., 4., 28.],

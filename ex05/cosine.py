@@ -10,6 +10,11 @@ def angle_cos(u: Vector[K], v: Vector[K]) -> float:
     Compute cos(u, v), the cosine of the angle between the two vectors u and v
     cos(θ) = A.B / (||A||||B||)
     ||A|| = length of A = 2-norm - also known as magnitude
+
+    angle
+    1 -> same direction
+    0 -> perpendicular
+    -1 -> opposite direction
     """
     norm_u = u.norm()
     norm_v = v.norm()
@@ -18,7 +23,6 @@ def angle_cos(u: Vector[K], v: Vector[K]) -> float:
         raise ValueError("angle is undefined for zero vectors")
 
     return u.dot(v) / (norm_u * norm_v)
-
 
 def main():
     """main"""

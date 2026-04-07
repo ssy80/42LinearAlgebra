@@ -17,8 +17,8 @@ def main():
         u = Vector([-1., -2.])
         print(u.norm_1(), u.norm(), u.norm_inf()) # 3.0, 2.236067977, 2.0
 
-        u = Vector([])
-        u = Vector(["a", 1, 2])
+        #u = Vector([])  #error
+        #u = Vector(["a", 1, 2]) #error
         
     except Exception as e:
         print(f"Error: {str(e)}")

@@ -7,7 +7,7 @@ K = TypeVar("K", int, float)
 
 def cross_product(u: Vector[K], v: Vector[K]) -> Vector[K]:
     """
-    Cross product is an operation between two 3D vectors that produces another vector.
+    Cross product is an operation between two 3D vectors that produces a new 3D vector perpendicular to both.
     A = (a1, a2, a3)
     B = (b1, b2, b3)
     A * B = (a2b3-a3b2, a3b1-a1b3, a1b2-a2b1)

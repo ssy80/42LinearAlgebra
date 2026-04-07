@@ -107,8 +107,8 @@ class Matrix(Generic[K]):
 
     def row_echelon(self)-> "Matrix[K]":
         """
-        Reduced Row echelon form
-        RREF (Gauss-Jordan)
+        Reduced Row echelon form - matrix arranged in staircase form, with zeros both below and above the pivot.
+        RREF (Gauss-Jordan) - a process of using row operations to turn a matrix all the way into RREF.
         """
         mat = [[float(x) for x in row] for row in self.value]
         mat, _ = self._gauss_jordan_elimination(mat)
@@ -138,17 +138,17 @@ class Matrix(Generic[K]):
         det = 1
 
         for i in range(side_length): 
-            pivot = max(range(i, side_length), key=lambda r: abs(mat[r][i]))  # Find the row with the largest absolute value in the pivot column
+            pivot = max(range(i, side_length), key=lambda r: abs(mat[r][i]))    # Find the row with the largest absolute value in the pivot column
             
-            if abs(mat[pivot][i]) < self.EPS:                                 # if any pivot is 0, the diagonal number will have 0, a * 0 = 0.
+            if abs(mat[pivot][i]) < self.EPS:                                   # if any pivot is 0, the diagonal number will have 0, a * 0 = 0.
                 return 0
-            if pivot != i:                                                    # pivot row id is not same as currnt row, swap row, best row now on top mat[i].
-                mat[i], mat[pivot], det = mat[pivot], mat[i], -det            # every row swap, det sign is changed by multiply by -1
+            if pivot != i:                                                      # pivot row id is not same as currnt row, swap row, best row now on top mat[i].
+                mat[i], mat[pivot], det = mat[pivot], mat[i], -det              # every row swap, det sign is changed by multiply by -1
             
             det *= mat[i][i]
             
-            for r in range(i+1, side_length):               # process each col value to 0 below pivot value
-                factor = mat[r][i] / mat[i][i]              # elimination factor
+            for r in range(i+1, side_length):                                   # process each col value to 0 below pivot value
+                factor = mat[r][i] / mat[i][i]                                  # elimination factor
                 for c in range(i, side_length): 
                     mat[r][c] -= factor * mat[i][c]        
 
@@ -162,26 +162,31 @@ class Matrix(Generic[K]):
         """
         self.is_square_matrix()
         rows, _ = self.shape()
-        det = float(self.determinant())
-        if abs(det) < self.EPS:
-            raise ValueError("matrix is singular and has no inverse")
 
         a = [[float(x) for x in row] for row in self.value]
         inv = [[1.0 if r == c else 0.0 for c in range(rows)] for r in range(rows)]
+
         _, inv = self._gauss_jordan_elimination(a, inv, require_full_pivot=True)
+        
         return Matrix(inv)
 
     def rank(self) -> int:
         """
         Rank of matrix = number of non-zero rows in RREF.
+        Number of linearly independent rows/columns.
+        e.g rank 1 -> all rows/columns lie along one direction
+            rank 2 -> they span a plane
+            rank 3 -> they span 3D space
         """
         mat = [[float(x) for x in row] for row in self.value]
+
         mat, _ = self._gauss_jordan_elimination(mat)
-        # Count rows that are not all zero
+
         rank = 0
         for row in mat:
             if any(abs(x) >= self.EPS for x in row):
                 rank += 1
+
         return rank
 
     def _gauss_jordan_elimination(
@@ -204,22 +209,21 @@ class Matrix(Generic[K]):
             if pivot_row >= rows:
                 break
             
-            # Partial pivoting: pick the row with the col having largest absolute value.
-            best_row = max(range(pivot_row, rows), key=lambda r: abs(left[r][col])) # pass r from range(), max() find largest col value using key, get row with largest col value 
+            best_row = max(range(pivot_row, rows), key=lambda r: abs(left[r][col])) # Partial pivoting: pick the row with the col having largest absolute value.
             
-            if abs(left[best_row][col]) < self.EPS:     # best row (pivot) col is 0, 
-                if require_full_pivot:                  # cannot get inverse
+            if abs(left[best_row][col]) < self.EPS:                                 # best row (pivot) col is 0, 
+                if require_full_pivot:                                              # cannot get inverse
                     raise ValueError("matrix is singular and has no inverse")
                 continue
 
-            if best_row != pivot_row:                     # swap pivot row with best row, best_row becomes pivot_row
+            if best_row != pivot_row:                                               # swap pivot row with best row, best_row becomes pivot_row
                 left[pivot_row], left[best_row] = left[best_row], left[pivot_row]
                 if right is not None:
                     right[pivot_row], right[best_row] = right[best_row], right[pivot_row]
 
             pivot = left[pivot_row][col]
 
-            left[pivot_row] = [x / pivot for x in left[pivot_row]]     # Normalize pivot row so each pivot is 1.0. By dividing every number with pivot
+            left[pivot_row] = [x / pivot for x in left[pivot_row]]                  # Normalize pivot row so each pivot is 1.0. By dividing every number with pivot
             if right is not None:
                 right[pivot_row] = [x / pivot for x in right[pivot_row]]
 
@@ -236,7 +240,7 @@ class Matrix(Generic[K]):
 
             pivot_row += 1
 
-        if require_full_pivot and pivot_row < rows:  # final pivot check, every row must have a pivot.
+        if require_full_pivot and pivot_row < rows:                                 # final pivot check, every row must have a pivot.
             raise ValueError("matrix is singular and has no inverse")
 
         return left, right
@@ -301,6 +305,7 @@ class Matrix(Generic[K]):
 
     def is_match_matrix_col_vector_row(self, vec: Vector[K])-> None:
         """
+        Check matrix columns length match vector rows length
         """
         cols = len(self.value[0])
         

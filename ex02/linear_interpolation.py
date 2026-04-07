@@ -23,7 +23,7 @@ def lerp(u: V, v: V, t: float) -> V:
         v_minus_u = Vector([row[0] for row in v.value]).sub(Vector([row[0] for row in u.value]))
         v_minus_u_t = v_minus_u.scl(t)
         result = Vector([row[0] for row in u.value]).add(v_minus_u_t)
-        return result   
+        return result
 
     if isinstance(u, Matrix):
         is_match_matrix_shape(u, v)

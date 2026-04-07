@@ -1,8 +1,4 @@
 from matrix import Matrix
-from typing import TypeVar
-
-
-K = TypeVar("K", int, float)
 
 
 def main():
@@ -12,6 +8,15 @@ def main():
 
         u = Matrix([[2., 0.],[0., 3.],[1, 5],])   # [2, 0, 1], [0, 3, 5]
         print(u.transpose())
+
+        u = Matrix([[2., 0.],[0., 3.]])   # [2, 0], [0, 3]
+        print(u.transpose())
+
+        u = Matrix([[2., 0.]])   # [2], [0]
+        print(u.transpose())
+
+        #u = Matrix([[],[]])   # error
+        #print(u.transpose())
 
     except Exception as e:
         print(f"Error: {str(e)}")

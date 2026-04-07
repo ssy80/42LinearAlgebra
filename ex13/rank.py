@@ -1,8 +1,4 @@
 from matrix import Matrix
-from typing import TypeVar
-
-
-K = TypeVar("K", int, float)
 
 
 def main():
@@ -18,6 +14,10 @@ def main():
 
         u = Matrix([[8., 5., -2.],[ 4., 7., 20.],[ 7., 6., 1.],[21., 18., 7.],])
         print(u.rank()) # 3
+
+        #u = Matrix([[8., 5., ""],[ 4., 7., 20.],[ 7., 6., 1.],[21., 18., 7.],])
+        #print(u.rank()) # error
+
         
     except Exception as e:
         print(f"Error: {str(e)}")
