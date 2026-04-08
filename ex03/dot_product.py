@@ -1,6 +1,11 @@
 from vector import Vector
 
 
+'''
+dot product > 0 = same direction
+dot product == 0 = perpendicular
+dot product < 0 = opposite direction
+'''
 def main():
     """main"""
 

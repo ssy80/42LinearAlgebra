@@ -15,6 +15,9 @@ def main():
         u = Matrix([[2., 0.]])   # [2], [0]
         print(u.transpose())
 
+        u = Matrix([[2.], [0.]])   # [2, 0]
+        print(u.transpose())
+
         #u = Matrix([[],[]])   # error
         #print(u.transpose())
 
